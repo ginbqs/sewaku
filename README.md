@@ -8,4 +8,4 @@ Aplikasi ini dibuat menggunakan laravel.
 
 ## License
 
-SEWAKU is open-sourced software licensed under the [next-in.id license](https://next-in.id).
+SEWAKU is open-sourced software licensed under the [next-in.id](https://next-in.id).
