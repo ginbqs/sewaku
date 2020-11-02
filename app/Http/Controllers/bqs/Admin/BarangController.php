@@ -1,23 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Backend\Admin;
+namespace App\Http\Controllers\bqs\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
-use App\Models\Produk;
-use App\Models\ProdukDetail;
-use App\Models\Masterdata\JenisProduk;
-use App\Models\Masterdata\TemaJenis;
-use App\Models\Masterdata\JudulTema;
-use App\Models\Masterdata\Satuan;
-use App\Models\HistoriProduk;
+use App\Models\Barang;
+use App\Models\BarangDetail;
+use App\Models\HistoriBarang;
 use Illuminate\Support\Facades\Validator;
 Use View;
 Use DB;
 
-class ProdukController extends Controller
+class BarangController extends Controller
 {
     function index(){
     	// $route = Request()->route()->getName();

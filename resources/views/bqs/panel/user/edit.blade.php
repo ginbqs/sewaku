@@ -4,26 +4,49 @@
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
-          <label for="input_name">Nama</label>
-          <input type="text" class="form-control" id="input_name" placeholder="Nama" name="input_name" value="{{$user->name}}">
-          <span id="error_input_name" class="error invalid-feedback"></span>
+          <label for="input_nama">Nama</label>
+          <input type="text" class="form-control" id="input_nama" placeholder="Nama" name="input_nama" value="{{$user->nama}}">
+          <span id="error_input_nama" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_kelamin">Kelamin</label>
+          <select class="form-control" id="input_kelamin"  name="input_kelamin">
+            <option value="l" {{$user->kelamin==='l' ? 'selected' : ''}}>Laki - Laki</option>
+            <option value="p" {{$user->kelamin==='p' ? 'selected' : ''}}>Perempuan</option>
+          </select>
+          <span id="error_input_kelamin" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_foto">Foto</label>
+          <input type="file" class="form-control" id="input_foto" placeholder="Foto" name="input_foto">{{$user->foto}}
+          <span id="error_input_foto" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_tempat_lahir">Tempat Lahir</label>
+          <input type="text" class="form-control" id="input_tempat_lahir" placeholder="Tempat Lahir" name="input_tempat_lahir" value="{{$user->tempat_lahir}}">
+          <span id="error_input_tempat_lahir" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_tanggal_lahir">Tanggal Lahir</label>
+          <input type="text" class="form-control" id="input_tanggal_lahir" placeholder="Tanggal Lahir" name="input_tanggal_lahir" value="{{$user->tanggal_lahir}}">
+          <span id="error_input_tanggal_lahir" class="error invalid-feedback"></span>
         </div>
         <div class="form-group">
           <label for="input_email">Email</label>
-          <input type="email" class="form-control" id="input_email" placeholder="Email" name="input_email"  value="{{$user->email}}">
+          <input type="email" class="form-control" id="input_email" placeholder="Email" name="input_email" value="{{$user->email}}">
           <span id="error_input_email" class="error invalid-feedback"></span>
         </div>
         <div class="form-group">
           <label for="input_phone_number">No HP</label>
-          <input type="text" class="form-control" id="input_phone_number" placeholder="No HP" name="input_phone_number"  value="{{$user->phone_number}}">
+          <input type="text" class="form-control" id="input_phone_number" placeholder="No HP" name="input_phone_number" value="{{$user->no_hp}}">
           <span id="error_input_phone_number" class="error invalid-feedback"></span>
         </div>
         <div class="form-group">
           <label for="input_level">Level</label><br>
           <div class="row">
             <div class="col-md-10">
-              <input type="text" class="form-control" id="input_level" placeholder="Pilih Level" name="input_level" autocomplete="off"  value="{{$user->app_user_level_value}}">
-              <input type="hidden" id='input_level_id' name="input_level_id" readonly class="form-control"   value="{{$user->app_user_level_id}}">
+              <input type="text" class="form-control" id="input_level" placeholder="Pilih Level" name="input_level" autocomplete="off" value="{{$user->user_level_value}}">
+              <input type="hidden" id='input_level_id' name="input_level_id" readonly class="form-control"  value="{{$user->user_level_id}}">
               <span id="error_input_level" class="error invalid-feedback"></span>
             </div>
             <div class="col-md-2" style="padding-top: 3px">
@@ -36,28 +59,48 @@
       </div>
       <div class="col-md-6">
         <div class="form-group">
+          <label for="input_agama">Agama</label>
+          <input type="text" class="form-control" id="input_agama" placeholder="Agama" name="input_agama"  value="{{$user->agama}}">
+          <span id="error_input_agama" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_nik">NIK</label>
+          <input type="text" class="form-control" id="input_nik" placeholder="NIK" name="input_nik"  value="{{$user->ktp}}">
+          <span id="error_input_nik" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_nis">NIS</label>
+          <input type="text" class="form-control" id="input_nis" placeholder="NIS" name="input_nis"  value="{{$user->nis}}">
+          <span id="error_input_nis" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_jurusan">Jurusan</label>
+          <input type="text" class="form-control" id="input_jurusan" placeholder="Jurusan" name="input_jurusan"  value="{{$user->jurusan}}">
+          <span id="error_input_jurusan" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
           <label for="input_kota">Provinsi</label>
-          <input type="text" class="form-control" id="input_provinsi" placeholder="Provinsi" name="input_provinsi"  value="{{$user->mst_provinsi_nama}}">
+          <input type="text" class="form-control" id="input_provinsi" placeholder="Provinsi" name="input_provinsi"  value="{{$user->provinsi}}">
           <span id="error_input_provinsi" class="error invalid-feedback"></span>
-          <input type="hidden" id='input_provinsi_id' name="input_provinsi_id" readonly class="form-control"  value="{{$user->provinsi_id}}">
+          <input type="hidden" id='input_provinsi_id' name="input_provinsi_id" readonly class="form-control"  value="{{$user->provinsi}}">
         </div>
         <div class="form-group">
           <label for="input_kota">Kota</label>
-          <input type="text" class="form-control" id="input_kota" placeholder="Kota" name="input_kota"  value="{{$user->mst_kota_nama}}">
+          <input type="text" class="form-control" id="input_kota" placeholder="Kota" name="input_kota"  value="{{$user->kota}}">
           <span id="error_input_kota" class="error invalid-feedback"></span>
-          <input type="hidden" id='input_kota_id' name="input_kota_id" readonly class="form-control"  value="{{$user->kota_id}}">
+          <input type="hidden" id='input_kota_id' name="input_kota_id" readonly class="form-control" value="{{$user->kota}}">
         </div>
         <div class="form-group">
           <label for="input_kecamatan">Kecamatan</label>
-          <input type="text" class="form-control" id="input_kecamatan" placeholder="Kota" name="input_kecamatan"  value="{{$user->mst_kecamatan_nama}}">
+          <input type="text" class="form-control" id="input_kecamatan" placeholder="Kota" name="input_kecamatan" value="{{$user->kecamatan}}">
           <span id="error_input_kecamatan" class="error invalid-feedback"></span>
-          <input type="hidden" id='input_kecamatan_id' name="input_kecamatan_id" readonly class="form-control"  value="{{$user->kecamatan_id}}">
+          <input type="hidden" id='input_kecamatan_id' name="input_kecamatan_id" readonly class="form-control"  value="{{$user->kecamatan}}">
         </div>
         <div class="form-group">
           <label for="input_desa">Desa</label>
-          <input type="text" class="form-control" id="input_desa" placeholder="Desa" name="input_desa" autocomplete="off"  value="{{$user->mst_desa_nama}}">
+          <input type="text" class="form-control" id="input_desa" placeholder="Desa" name="input_desa" autocomplete="off"  value="{{$user->desa}}">
           <span id="error_input_desa" class="error invalid-feedback"></span>
-          <input type="hidden" id='input_desa_id' name="input_desa_id" readonly class="form-control"  value="{{$user->desa_id}}">
+          <input type="hidden" id='input_desa_id' name="input_desa_id" readonly class="form-control"  value="{{$user->desa}}">
         </div>
         <div class="form-group">
           <label for="input_username">Alamat</label>

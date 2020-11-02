@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('ktp')->nullable();
             $table->string('jurusan')->nullable();
             $table->char('kelamin',1);
-            $table->string('agama');
+            $table->string('agama')->nullable();
             $table->string('tempat_lahir');
             $table->date('tanggal_lahir');
             $table->string('no_hp');

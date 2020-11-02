@@ -3,9 +3,32 @@
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
-          <label for="input_name">Nama</label>
-          <input type="text" class="form-control" id="input_name" placeholder="Nama" name="input_name">
-          <span id="error_input_name" class="error invalid-feedback"></span>
+          <label for="input_nama">Nama</label>
+          <input type="text" class="form-control" id="input_nama" placeholder="Nama" name="input_nama">
+          <span id="error_input_nama" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_kelamin">Kelamin</label>
+          <select class="form-control" id="input_kelamin"  name="input_kelamin">
+            <option value="l">Laki - Laki</option>
+            <option value="p">Perempuan</option>
+          </select>
+          <span id="error_input_kelamin" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_foto">Foto</label>
+          <input type="file" class="form-control" id="input_foto" placeholder="Foto" name="input_foto">
+          <span id="error_input_foto" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_tempat_lahir">Tempat Lahir</label>
+          <input type="text" class="form-control" id="input_tempat_lahir" placeholder="Tempat Lahir" name="input_tempat_lahir">
+          <span id="error_input_tempat_lahir" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_tanggal_lahir">Tanggal Lahir</label>
+          <input type="text" class="form-control" id="input_tanggal_lahir" placeholder="Tanggal Lahir" name="input_tanggal_lahir">
+          <span id="error_input_tanggal_lahir" class="error invalid-feedback"></span>
         </div>
         <div class="form-group">
           <label for="input_email">Email</label>
@@ -19,7 +42,7 @@
         </div>
         <div class="form-group">
           <label for="input_password">Password</label>
-          <input type="password" class="form-control" id="input_password" placeholder="Password" name="input_password">
+          <input type="password" class="form-control" id="input_password" placeholder="Password" name="input_password" autocomplete="off">
           <span id="error_input_password" class="error invalid-feedback"></span>
         </div>
         <div class="form-group">
@@ -39,6 +62,26 @@
         </div>
       </div>
       <div class="col-md-6">
+        <div class="form-group">
+          <label for="input_agama">Agama</label>
+          <input type="text" class="form-control" id="input_agama" placeholder="Agama" name="input_agama">
+          <span id="error_input_agama" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_nik">NIK</label>
+          <input type="text" class="form-control" id="input_nik" placeholder="NIK" name="input_nik">
+          <span id="error_input_nik" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_nis">NIS</label>
+          <input type="text" class="form-control" id="input_nis" placeholder="NIS" name="input_nis">
+          <span id="error_input_nis" class="error invalid-feedback"></span>
+        </div>
+        <div class="form-group">
+          <label for="input_jurusan">Jurusan</label>
+          <input type="text" class="form-control" id="input_jurusan" placeholder="Jurusan" name="input_jurusan">
+          <span id="error_input_jurusan" class="error invalid-feedback"></span>
+        </div>
         <div class="form-group">
           <label for="input_kota">Provinsi</label>
           <input type="text" class="form-control" id="input_provinsi" placeholder="Provinsi" name="input_provinsi">
@@ -86,9 +129,19 @@
   .capitalize {
     text-transform: uppercase;
   }
+  #ui-datepicker-div{
+    background-color: #b8b8b8
+  }
+  .ui-datepicker-header{
+    text-align: center;
+  }
+  .ui-datepicker-prev{
+    margin-right:40%
+  }
 </style>
 <script type="text/javascript">
 $(document).ready(function () {
+  $("#input_tanggal_lahir").datepicker();
   $('#create').validate({
     submitHandler: function (form) {
 
@@ -188,7 +241,8 @@ $( function() {
           dataType: "json",
           data: {
              _token: CSRF_TOKEN,
-             search: request.term
+             search: request.term,
+             table:'provinsi'
           },
           success: function( data ) {
              response( data );
@@ -223,6 +277,7 @@ $( function() {
              _token: CSRF_TOKEN,
              search: request.term,
              provinsi_id: $("#input_provinsi_id").val(),
+             table:'kota'
           },
           success: function( data ) {
              response( data );
@@ -258,7 +313,7 @@ $( function() {
              search: request.term,
              provinsi_id: $("#input_provinsi_id").val(),
              kota_id: $("#input_kota_id").val(),
-
+             table:'kecamatan'
           },
           success: function( data ) {
              response( data );
@@ -295,6 +350,7 @@ $( function() {
              provinsi_id: $("#input_provinsi_id").val(),
              kota_id: $("#input_kota_id").val(),
              kecamatan_id: $("#input_kecamatan_id").val(),
+             table:'desa'
           },
           success: function( data ) {
              response( data );

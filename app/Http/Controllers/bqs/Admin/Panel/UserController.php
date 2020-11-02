@@ -54,12 +54,15 @@ class UserController extends Controller
 		if ($request->ajax()) {
 		 // Setup the validator
 			$rules = [
-				'input_name' 			=> 'required',
+				'input_nama' 			=> 'required',
 				'input_email' 			=> 'required',
-				'input_phone_number' 	=> 'required',
 				'input_password' 		=> 'required',
+				'input_phone_number' 	=> 'required',
 				'input_level' 			=> 'required',
 				'input_level_id' 		=> 'required',
+				'input_kelamin' 		=> 'required',
+				'input_tempat_lahir' 	=> 'required',
+				'input_tanggal_lahir'	=> 'required',
 				'input_provinsi' 		=> 'required',
 				'input_provinsi_id' 	=> 'required',
 				'input_kota' 			=> 'required',
@@ -68,6 +71,7 @@ class UserController extends Controller
 				'input_kecamatan_id' 	=> 'required',
 				'input_desa' 			=> 'required',
 				'input_desa_id' 		=> 'required',
+				'input_alamat' 			=> 'required',
 			];
 
 			$validator = Validator::make($request->all(), $rules);
@@ -77,21 +81,41 @@ class UserController extends Controller
 				'errors' => $validator->getMessageBag()->toArray()
 				]);
 			} else {
-    			$id = IdGenerator::generate(['table' => 'app_user_list', 'length' => 15, 'prefix' =>$request->input('input_desa_id').'-']);
+				if ($request->input('input_level_id')=='peminjam') {
+					$id = 'S'.time();
+				}else{
+					$id = 'P'.time();
+				}
 				User::create([
         			'id'			=> $id,
-				    'name' 			=> strtoupper(strtolower($request->input('input_name'))),
+				    'nama' 			=> strtoupper(strtolower($request->input('input_nama'))),
 				    'email' 		=> strtolower($request->input('input_email')),
-		            'phone_number' 	=> $request->input('input_phone_number'),
-		            'provinsi_id'	=> $request->input('input_provinsi_id'),
-		            'kota_id' 		=> $request->input('input_kota_id'),
-		            'kecamatan_id' 	=> $request->input('input_kecamatan_id'),
-		            'desa_id' 		=> $request->input('input_desa_id'),
-		            'alamat' 		=> $request->input('input_alamat'),
-		            'status_konfirmasi' => '1',
 		            'password' 		=> bcrypt($request->input('input_password')),
-		            'app_user_level_id' => $request->input('input_level_id'),
+		            'nis' 			=> $request->input('input_nis'),
+		            'ktp' 			=> $request->input('input_nik'),
+		            'jurusan' 		=> $request->input('input_jurusan'),
+		            'kelamin' 		=> $request->input('input_kelamin'),
+		            'agama' 		=> $request->input('input_agama'),
+		            'tempat_lahir' 	=> $request->input('input_tempat_lahir'),
+		            'tanggal_lahir' => date("Y-m-d",strtotime($request->input('input_tanggal_lahir'))),
+		            'no_hp' 		=> $request->input('input_phone_number'),
+		            'provinsi'		=> $request->input('input_provinsi_id'),
+		            'kota' 			=> $request->input('input_kota_id'),
+		            'kecamatan' 	=> $request->input('input_kecamatan_id'),
+		            'desa' 			=> $request->input('input_desa_id'),
+		            'alamat' 		=> $request->input('input_alamat'),
+		            'user_level_id' => $request->input('input_level_id'),
 				]);
+				if ($request->input('input_foto')!='') {
+					$input['image'] = $id.'.'.$request->input_foto->extension();
+	        		if ($request->input_foto->move(public_path('images/users'), $input['image'])) {
+	        			User::where('id',$id)
+	        			->update(['foto' => 'images/users/'.$input['image']]);
+						return response()->json(['type' => 'success', 'message' => "Successfully Created"]);
+	        		}else{
+						return response()->json(['error'=>$validator->errors()->all()]);
+	        		}
+				}
 				return response()->json(['type' => 'success', 'message' => "Successfully Created"]);
 			}
 		} else {
@@ -100,14 +124,10 @@ class UserController extends Controller
     }
     function edit(Request $request, $id){
     	if($request->ajax()){
-    		$user = DB::table('app_user_list')
-    		->leftJoin('mst_desa',  'mst_desa.id', '=', 'app_user_list.desa_id')
-            ->leftJoin('mst_kecamatan',  'mst_kecamatan.id', '=', 'mst_desa.kecamatan_id')
-            ->leftJoin('mst_kota',  'mst_kota.id', '=', 'mst_kecamatan.kota_id')
-            ->leftJoin('mst_provinsi',  'mst_provinsi.id', '=', 'mst_kota.provinsi_id')
-    	 	->join('app_user_level',  'app_user_level.level', '=', 'app_user_list.app_user_level_id')
-            ->select('app_user_list.*', 'mst_provinsi.nama as mst_provinsi_nama', 'mst_kota.nama as mst_kota_nama', 'mst_kecamatan.nama as mst_kecamatan_nama','mst_desa.nama as mst_desa_nama','app_user_level.value as app_user_level_value')
-            ->where('app_user_list.id', $id)
+    		$user = DB::table('users')
+    	 	->join('users_level',  'users_level.level', '=', 'users.user_level_id')
+            ->select('users.*','users_level.value as user_level_value')
+            ->where('users.id', $id)
             ->first();
     		$view = View::make('bqs.panel.user.edit',compact('user'))->render();
     		return response()->json(['html' => $view]);
@@ -119,11 +139,14 @@ class UserController extends Controller
     function update(Request $request, $id){
     	if($request->ajax()){
     		$rules = [
-				'input_name' 			=> 'required',
+				'input_nama' 			=> 'required',
 				'input_email' 			=> 'required',
 				'input_phone_number' 	=> 'required',
 				'input_level' 			=> 'required',
 				'input_level_id' 		=> 'required',
+				'input_kelamin' 		=> 'required',
+				'input_tempat_lahir' 	=> 'required',
+				'input_tanggal_lahir'	=> 'required',
 				'input_provinsi' 		=> 'required',
 				'input_provinsi_id' 	=> 'required',
 				'input_kota' 			=> 'required',
@@ -132,6 +155,7 @@ class UserController extends Controller
 				'input_kecamatan_id' 	=> 'required',
 				'input_desa' 			=> 'required',
 				'input_desa_id' 		=> 'required',
+				'input_alamat' 			=> 'required',
 			];
 
 			$validator = Validator::make($request->all(), $rules);
@@ -142,16 +166,34 @@ class UserController extends Controller
 				]);
 			} else {
 				$user = User::find($id);
-				$user->name = strtoupper(strtolower($request->input_name));
-				$user->email = strtolower($request->input_email);
-				$user->phone_number = $request->input_phone_number;
-				$user->app_user_level_id = strtolower($request->input_level_id);
-				$user->provinsi_id 	= $request->input_provinsi_id;
-				$user->kota_id 		= $request->input_kota_id;
-				$user->kecamatan_id = $request->input_kecamatan_id;
-				$user->desa_id 		= $request->input_desa_id;
+				if ($request->input_foto!='') {
+					if ($user->foto!='') {
+						if(file_exists(public_path('images/users/'.$user->foto))){
+					    	unlink(public_path('images/users/'.$user->foto));
+					    }
+					}
+				    $input['image'] = $id.'.'.$request->input_foto->extension();
+		    		$request->input_foto->move(public_path('images/users'), $input['image']);
+					$user->foto 		= 'images/users/'.$input['image'];
+			    }
+				$user->nama 		= strtoupper(strtolower($request->input_nama));
+				$user->email 		= strtolower($request->input_email);
+				$user->nis 			= $request->input_nis;
+				$user->ktp 			= $request->input_nik;
+				$user->jurusan 		= $request->input_jurusan;
+				$user->kelamin 		= $request->input_kelamin;
+				$user->agama 		= $request->input_agama;
+				$user->tempat_lahir = $request->input_tempat_lahir;
+				$user->tanggal_lahir= date("Y-m-d",strtotime($request->input_tanggal_lahir));
+				$user->no_hp 		= $request->input_phone_number;
+				$user->provinsi 	= $request->input_provinsi_id;
+				$user->kota 		= $request->input_kota_id;
+				$user->kecamatan 	= $request->input_kecamatan_id;
+				$user->desa 		= $request->input_desa_id;
 				$user->alamat 		= $request->input_alamat;
+				$user->user_level_id = strtolower($request->input_level_id);
 				$user->save();
+
             	return response()->json(['type' => 'success', 'message' => "Successfully Updated"]);
 			}
     	} else {
@@ -171,11 +213,12 @@ class UserController extends Controller
     {
     	$input 	= $request->all();
         $search = $request->input('search');
+        $table = $request->input('table');
 
         if($search == ''){
-            $users = User::orderby('name','asc')->select('id','name')->limit(5);
+            $users = User::orderby($table,'asc')->select($table)->limit(5);
         }else{
-            $users = User::orderby('name','asc')->select('id','name')->where('name', 'like', '%' .$search . '%')->limit(5);
+            $users = User::orderby($table,'asc')->select($table)->where($table, 'like', '%' .$search . '%')->groupBy($table)->limit(5);
         }
         if (isset($input['level']) && $input['level']!='') {
         	$users = $users->where('app_user_level_id',$input['level']);
@@ -183,7 +226,11 @@ class UserController extends Controller
         $users = $users->get();
         $response = array();
         foreach($users as $user){
-            $response[] = array("value"=>$user->id,"label"=>$user->name);
+        	if (isset($input['level']) && $input['level']!='') {
+            	$response[] = array("value"=>$user->id,"label"=>$user->name);
+	        }else{
+            	$response[] = array("value"=>$user->$table,"label"=>$user->$table);
+	        }
         }
 
         return response()->json($response);

@@ -18,11 +18,11 @@ Route::resource('level','Panel\LevelController');
 Route::get('/allLevel','Panel\LevelController@allLevel')->name('allLevel.level');
 Route::post('autocompleteLevel', 'Panel\LevelController@autocomplete')->name('autocompleteLevel.level');
 
-Route::resource('/produk','ProdukController');
-Route::get('/allProduk','ProdukController@allProduk')->name('allProduk.produk');
-Route::get('/cekChild/{id}','ProdukController@cekChild')->name('cekChild.produk');
-Route::resource('/produkDetail','ProdukDetailController');
-Route::get('/allProdukDetail','ProdukDetailController@allProdukDetail')->name('allProdukDetail.produk');
+Route::resource('/barang','BarangController');
+Route::get('/allBarang','BarangController@allBarang')->name('allBarang.barang');
+Route::get('/cekChild/{id}','BarangController@cekChild')->name('cekChild.barang');
+Route::resource('/barangDetail','BarangDetailController');
+Route::get('/allBarangDetail','BarangDetailController@allBarangDetail')->name('allBarangDetail.barang');
 
 Route::resource('/kasir','KasirController');
 Route::get('/allKasir','KasirController@allKasir')->name('allKasir.kasir');
