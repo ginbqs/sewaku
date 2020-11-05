@@ -22,7 +22,8 @@ class CreateMstBukuTable extends Migration
             $table->char('tahun_terbit',5)->nullable();
             $table->string('isbn')->nullable();
             $table->integer('halaman')->nullable();
-            $table->integer('jumlah');
+            $table->integer('jumlah')->nullable()->default(0);
+            $table->integer('terpinjam')->nullable()->default(0);
             $table->string('gambar')->nullable();
             $table->text('sinopsis')->nullable();
             $table->string('nama_rak');

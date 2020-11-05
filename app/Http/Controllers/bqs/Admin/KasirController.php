@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Backend\Admin;
+namespace App\Http\Controllers\bqs\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -9,278 +9,59 @@ use Illuminate\Support\Facades\Validator;
 Use View;
 Use DB;
 
-use App\Models\Kasir\Pengeluaran;
-use App\Models\Produk;
-use App\Models\KasirLock;
-use App\Models\KasirDetailTemp;
 use App\Models\Kasir;
+use App\Models\Barang;
 use App\Models\KasirDetail;
-use App\Models\HistoriProduk;
-use App\Models\Kasir\PengeluaranDetail;
-use App\Models\PaketMenu;
-use App\Models\PaketMenuDetail;
-use App\Models\Panel\App_config;
 
 class KasirController extends Controller
 {
     function index(){
-    	$kasirLock = KasirLock::where('status','1')->first();
-    	return view('admin.kasir.all',compact('kasirLock'));
+    	return view('bqs.kasir.all');
     }
-	function checkOutHp(){
-    	return view('admin.kasir.checkoutHp');
-    }    
-    public function allProduk(Request $request){
+    public function allKasir(Request $request){
     	$input = $request->all();
-    	$dt_produk = Produk::getAllProduk($input,'data');
+    	$dt_kasir = Kasir::getAllKasir($input,'data');
         $no = isset($input['start']) ? $input['start'] : 0;
         $data = array();
-        foreach($dt_produk as $produk){
-            $child = Produk::hasChildMaxMin($produk->id);
-        	if (isset($child->harga_max)!='' && isset($child->harga_min)!='') {
-        		$harga_max 		= ($child->harga_max > 0 ? number_format($child->harga_max,2) : '');
-        		$harga_min 		= ($child->harga_min > 0 ? number_format($child->harga_min,2) : '');
-        		$tampil_harga 	= $harga_min.' - '.$harga_max;
-
-        		$tgl_kadaluarsa_max = ($child->tgl_kadaluarsa_max !='' ? date("d M Y",strtotime($child->tgl_kadaluarsa_max)) : '');
-        		$tgl_kadaluarsa_min = ($child->tgl_kadaluarsa_min !='' ? date("d M Y",strtotime($child->tgl_kadaluarsa_min)) : '');
-        		$tampil_expire 		= $tgl_kadaluarsa_min.' - '.$tgl_kadaluarsa_max;
-        		$nama = $produk->nama.'<ul><li>'.$produk->stok.' '.$produk->mst_satuan_nama.'</li><li>Rp. '.$tampil_harga.'</li><li>ED : '.($produk->status_expire=='1' ? $tampil_expire : '-').'</li></ul>';
-        	}else{
-        		$nama = $produk->nama.'<ul><li>'.$produk->stok.' '.$produk->mst_satuan_nama.'</li><li>Rp. '.number_format($produk->harga_jual,2).'</li><li>ED : '.($produk->status_expire=='1' ? date("d M Y",strtotime($produk->tgl_kadaluarsa)) : '-').'</li></ul>';
-        	}
-        	$url= asset($produk->foto_thumnail);
-            $foto = ($produk->foto_thumnail!='' ?  '<img src="'.$url.'"   height="50" class="img-rounded" align="center" />' : "");
-            $html = "<div class='row editPembelian' id='".$produk->id."'>";
-            	if ($foto!='') {
-	            	$html .= "<div class='col-4'>";
-            			$html .= $foto;
-            		$html .= "</div>";
-	            	$html .= "<div class='col-8'>";
-            	}else{
-	            	$html .= "<div class='col-12'>";
-            	}
-            			$html .= $nama;
-            		$html .= "</div>";
-            $html .= "</div>";
-            $row = array();
-        	$row[] = $html;
-
-            $data[] = $row;
-        }
-        $output = array(
-		            "draw" => $input['draw'],
-		            "recordsTotal" =>  Produk::getAllProduk($input,'total'),
-		            "recordsFiltered" => Produk::getAllProduk($input,'raw'),
-		            "data" => $data,
-		            );
-		//output to json format
-		echo json_encode($output);
-    }
-    function cekKasirAbsen(){
-    	$response['bukaKasir'] = KasirLock::where('status','1')->exists();
-		echo json_encode($response);
-    }
-    function bukaKasir(Request $request){
-    	$dt_auth 	= Auth::user();
-		if ($request->ajax()) {
-		 // Setup the validator
-			$rules = [
-				'input_saldoAwal'		=> 'required',
-			];
-			$validator = Validator::make($request->all(), $rules);
-			if ($validator->fails()) {
-				return response()->json([
-					'type' => 'error',
-					'errors' => $validator->getMessageBag()->toArray()
-				]);
-			} else {
-				$input = $request->all();
-				KasirLock::create([
-					'id'			=> time(),
-					'tanggal'		=> date("Y-m-d"),
-					'time'			=> time(),
-					'nilai_awal'	=> $input['input_saldoAwal'],
-					'nilai_akhir'	=> 0,
-					'status'		=> 1,
-					'keterangan'	=> $input['input_catatan'],
-					'user_id'		=> $dt_auth->id,
-				]);
-				return response()->json(['type' => 'success', 'message' => "Successfully Created"]);
-			}
-		} else {
-			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
-		}
-    }
-    function pembelianProduk(Request $request,$id){
-    	if($request->ajax()){
-    		$produk = DB::table('trans_produk')
-    		->join('mst_satuan',  'mst_satuan.id', '=', 'trans_produk.satuan_id')
-            ->select('trans_produk.*', 'mst_satuan.nama as mst_satuan_nama')
-            ->where('trans_produk.id', $id)
-            ->first();
-    		$view = View::make('admin.kasir.editProduk',compact(['produk']))->render();
-    		return response()->json(['html' => $view]);
-    	} else {
-			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
-		}
-    }
-    function createPembelian(Request $request){
-    	$dt_auth 	= Auth::user();
-		if ($request->ajax()) {
-		 // Setup the validator
-			$rules = [
-				'input_detail_action'		=> 'required',
-			];
-			$validator = Validator::make($request->all(), $rules);
-			if ($validator->fails()) {
-				return response()->json([
-					'type' => 'error',
-					'errors' => $validator->getMessageBag()->toArray()
-				]);
-			} else {
-				DB::beginTransaction();
-
-				try {
-				    $input = $request->all();
-					$diskonProduk	= $input['input_diskon_produk'];
-				    if (isset($input['keranjang_id']) && $input['keranjang_id']!='') {
-						foreach ($input as $key => $value) {
-							if (substr($key, 0,25)=='input_jumlah_beli_produk_') {
-								$idProduk 	= explode('_', $key);
-								$kasir 		= KasirLock::where('status',1)->first();
-								if ($value < 1) {
-									$keranjang = KasirDetailTemp::where('id',sprintf('%05d', $input['keranjang_id']))->where('kasir_lock_id',$kasir->id)->where('produk_id',$idProduk[4]);
-									$keranjang->delete();
-								}else{
-									$produk 	= Produk::where('id',$idProduk[4])->first();
-									if (((int)$produk->stok - (int)$value) < 0) {
-							    		DB::rollback();
-										return response()->json(['type' => 'error', 'message' =>  $produk->nama." hanya memiliki stok ".$produk->stok]);
-							    	}
-									DB::table('trans_kasir_detail_temp')
-					                ->where('id', sprintf('%05d', $input['keranjang_id']))
-					                ->where('kasir_lock_id', $kasir->id)
-					                ->where('produk_id', $idProduk[4])
-					                ->update([
-					                	'jumlah' 		=> $value,
-					                	'harga_beli' 	=> $produk->harga_beli,
-					                	'harga_jual' 	=> $produk->harga_jual,
-					                	'diskon'		=> $diskonProduk,
-									    'harga_terjual'	=> $diskonProduk > 0 ? ($produk->harga_jual - ($produk->harga_jual*$diskonProduk)/100) : $produk->harga_jual,
-					                	'keterangan' 	=> '-',
-					                ]);
-								}
-							}
-						}
-				    }else{
-				    	$id 			= 'M'.time();
-						foreach ($input as $key => $value) {
-							if (substr($key, 0,25)=='input_jumlah_beli_produk_') {
-								$idProduk 	= explode('_', $key);
-								$produk 	= Produk::where('id',$idProduk[4])->first();
-								$kasir 		= KasirLock::where('status',1)->first();
-								$idDetail   = KasirDetailTemp::getID($kasir->id);
-								$cekTempDuplicate = KasirDetailTemp::where('produk_id',$idProduk[4])->where('kasir_lock_id',$kasir->id);
-								if (!$cekTempDuplicate->exists()) {
-									if (((int)$produk->stok - (int)$value) >= 0) {
-										KasirDetailTemp::create([
-											'id'			=> $idDetail,
-										    'kasir_lock_id'	=> $kasir->id,
-										    'produk_id'		=> $idProduk[4],
-										    'jumlah'		=> $value,
-										    'harga_beli'	=> $produk->harga_beli,
-										    'harga_jual'	=> $produk->harga_jual,
-										    'diskon'		=> $diskonProduk,
-										    'harga_terjual'	=> $diskonProduk > 0 ? ($produk->harga_jual - ($produk->harga_jual*$diskonProduk)/100) : $produk->harga_jual,
-										    'keterangan'	=> '-',
-										]);
-							    	}else{
-										DB::rollback();
-										return response()->json(['type' => 'error', 'message' =>  $produk->nama." hanya memiliki stok ".$produk->stok]);
-							    	}
-								}else{
-									$duplicate = $cekTempDuplicate->first();
-									$duplicate->jumlah 		= $duplicate->jumlah+$value;
-									$duplicate->harga_beli 	= $produk->harga_beli;
-									$duplicate->harga_jual 	= $produk->harga_jual;
-									$duplicate->diskon 		= $diskonProduk;
-									$duplicate->harga_terjual= $diskonProduk > 0 ? ($produk->harga_jual - ($produk->harga_jual*$diskonProduk)/100) : $produk->harga_jual;
-									$duplicate->save();
-									// return response()->json(['type' => 'error', 'message' => "Data Sudah pernah di masukan Keranjang. Silahkan edit data pada keranjang"]);
-								}
-							}
-						}
-				    }
-				    DB::commit();
-					return response()->json(['type' => 'success', 'message' => "Successfully Created"]);
-
-				    // all good
-				} catch (\Exception $e) {
-				    DB::rollback();
-				    dd($e);
-					return response()->json(['type' => 'error', 'message' => "Silahkan cek koneksi Anda"]);
-				    // something went wrong
-				}
-			}
-		} else {
-			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
-		}
-    }
-    function getKeranjang(){
-    	$kasir = KasirDetailTemp::select(DB::raw("sum(jumlah) as total_item"),DB::raw("sum(jumlah*harga_beli) as total_nilai_asal"),DB::raw("sum(jumlah*harga_jual) as total_nilai_jual"),DB::raw("sum(jumlah*harga_terjual) as total_nilai_terjual"))->first();
-		return response()->json(['message' => 'success', 'data' => $kasir]);
-    }
-    public function allKeranjang(Request $request){
-    	$input = $request->all();
-    	$dt_keranjang = KasirDetailTemp::getAllKeranjang($input,'data');
-        $no = isset($input['start']) ? $input['start'] : 0;
-        $data = array();
-        foreach($dt_keranjang as $keranjang){
+        foreach($dt_kasir as $kasir){
             $no++;
             $row = array();
-            
-            $row[] = $keranjang->id;
-            $row[] = $keranjang->trans_produk_nama;
-            $row[] = $keranjang->jumlah.' '.$keranjang->mst_satuan_nama;
-            $row[] = number_format($keranjang->harga_terjual,2);
-            $row[] = number_format($keranjang->jumlah * $keranjang->harga_terjual,2);
+        	$row[] = $no;
+            $row[] = date("Y-m-d",strtotime($kasir->tanggal));
+            $row[] = $kasir->total_nilai;
+            $row[] = $kasir->keterangan;
+            $row[] = "<a data-toggle='tooltip' class='col-md-3 btn btn-warning btn-md edit' id='".$kasir->id."' title='Edit'> <i class='fa fa-edit text-error'></i></a> <a data-toggle='tooltip' class='col-md-3 btn btn-danger btn-md  ".($kasir->status=='1' ? '' : 'delete')."' id='".$kasir->id."' title='Delete'> <i class='fa fa-trash-alt'></i></a>";
 
             $data[] = $row;
         }
         $output = array(
 		            "draw" => $input['draw'],
-		            "recordsTotal" =>  KasirDetailTemp::getAllKeranjang($input,'total'),
-		            "recordsFiltered" => KasirDetailTemp::getAllKeranjang($input,'raw'),
+		            "recordsTotal" =>  Kasir::getAllKasir($input,'total'),
+		            "recordsFiltered" => Kasir::getAllKasir($input,'raw'),
 		            "data" => $data,
 		            );
 		//output to json format
 		echo json_encode($output);
     }
-    function keranjangProduk(Request $request,$id){
-    	if($request->ajax()){
-    		$produk = DB::table('trans_produk')
-    		->join('trans_kasir_detail_temp',  'trans_produk.id', '=', 'trans_kasir_detail_temp.produk_id')
-    		->join('mst_satuan',  'mst_satuan.id', '=', 'trans_produk.satuan_id')
-            ->select('trans_produk.*', 'mst_satuan.nama as mst_satuan_nama','trans_kasir_detail_temp.jumlah','trans_kasir_detail_temp.harga_jual','trans_kasir_detail_temp.id as keranjang_id','trans_kasir_detail_temp.diskon')
-            ->where('trans_kasir_detail_temp.id', $id)
-            ->first();
-    		$view = View::make('admin.kasir.editProduk',compact(['produk']))->render();
-    		return response()->json(['html' => $view]);
-    	} else {
-			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
-		}
+    function create(Request $request){
+    	return view('bqs.kasir.create',['act' => 'add']);
     }
-    function checkOut(Request $request){
+    function edit(Request $request, $id){
+		$kasir = DB::table('trans_stok')
+        ->select('trans_stok.*')
+        ->where('trans_stok.id', $id)
+        ->first();
+        // dd($kasir);
+    	return view('bqs.kasir.edit',compact('kasir'))->with(['act'=>'edit']);
+    }
+    function update(Request $request,$id){
     	$dt_auth 	= Auth::user();
 		if ($request->ajax()) {
 		 // Setup the validator
 			$rules = [
-				'input_subtotal'	=> 'required',
-				'input_diskon'		=> 'required',
-				'input_total_bayar'	=> 'required',
-				'input_bayar'		=> 'required',
-				'input_selisih'		=> 'required',
+				'input_action'			=> 'required',
+				'input_tgl_kasir'	=> 'required',
+				'input_keterangan' 		=> 'required',
 			];
 			$validator = Validator::make($request->all(), $rules);
 			if ($validator->fails()) {
@@ -289,248 +70,61 @@ class KasirController extends Controller
 					'errors' => $validator->getMessageBag()->toArray()
 				]);
 			} else {
-				$input = $request->all();
-				DB::beginTransaction();
-				try {
-				    $input = $request->all();
-					$kasirLock 	= KasirLock::where('status',1)->first();
-					$total 		= KasirDetailTemp::select(DB::raw("sum(jumlah) as total_item"),DB::raw("sum(jumlah*harga_beli) as total_nilai_asal"),DB::raw("sum(jumlah*harga_jual) as total_nilai_jual"),DB::raw("sum(jumlah*harga_terjual) as total_nilai_terjual"))->first();
-					$idKasir = 'K'.time();
-					$kasir = Kasir::create([
-						'id'			=> $idKasir,
-						'tanggal'		=> date("Y-m-d H:i:s"),
-						'time'			=> time(),
-						'pembeli'		=> $input['input_pembeli'],
-						'pembeli_id'	=> isset($input['pembeli_id']) && $input['pembeli_id'] && $input['pembeli_id']!='' ? $input['pembeli_id'] : NULL,
-						'total_item'	=> $total->total_item,
-						'total_asal'	=> $total->total_nilai_asal,
-						'total_nilai'	=> $total->total_nilai_jual,
-						'diskon'		=> $input['input_diskon'],
-						'total_bayar'	=> $input['input_total_bayar'],
-						'total_terbayar'=> $input['input_bayar'],
-						'total_hutang'	=> $input['input_bayar'] - $input['input_total_bayar'],
-						'keterangan'	=> '-',
-						'kasir_lock_id'	=> $kasirLock->id,
-						'user_id'		=> 	$dt_auth->id,
+				if ($request->input_action=='add') {
+					$id = time();
+					Kasir::create([
+						'id'			=> $id,
+					    'tanggal'		=> date("Y-m-d",strtotime($request->input('input_tgl_kasir'))),
+					    'total_nilai'	=> 0,
+					    'total_item'	=> 0,
+					    'keterangan'	=> $request->input('input_keterangan'),
+					    'user_id'		=> $dt_auth->id,
+					    'status'		=> 0,
 					]);
-			    	$dt_keranjang = KasirDetailTemp::all();
-					foreach ($dt_keranjang as $key) {
-			    		$produk = Produk::where('id',$key->produk_id)->first();
-			    		if (((int)$produk->stok - (int)$key['jumlah']) < 0) {
-				    		DB::rollback();
-							return response()->json(['type' => 'error', 'message' =>  $produk->nama." hanya memiliki stok ".$produk->stok]);
-				    	}
-						$idProduk 	= $key->produk_id;
-						$idDetail   = KasirDetail::getID($idKasir);
-			    		
-						KasirDetail::create([
-							'id'			=> $idDetail,
-						    'kasir_id'		=> $idKasir,
-						    'produk_id'		=> $idProduk,
-						    'jumlah'		=> $key['jumlah'],
-						    'harga_beli'	=> $key['harga_beli'],
-						    'harga_jual'	=> $key['harga_jual'],
-						    'diskon'		=> $key['diskon'],
-						    'harga_terjual'	=> $key['harga_terjual'],
-						    'keterangan'	=> '-',
-						]);
-						HistoriProduk::create([
-				    		'link'			=> 'kasir/'.$idKasir.'/edit',
-				    		'jenis'			=> 'kasir',
-				    		'time'			=> time(),
-				    		'produk_id'		=> $idProduk,
-				    		'stok_awal'		=> $produk->stok,
-				    		'stok_akhir'	=> (int)$produk->stok - $key['jumlah'],
-				    		'stok_selisih'	=> -1 * (int)$key['jumlah'],
-				    		'harga'			=> $key['harga_terjual'],
-				    		'keterangan' 	=> 'Kasir oleh = '.$dt_auth->id
-				    	]);
-
-				    	$produk->total_terbeli = $produk->total_terbeli+$key['jumlah'];
-			    		$produk->stok = $produk->stok - $key['jumlah'];
-			    		$produk->save();
-
-			    		Produk::UpdateStok($produk->sub_id,'update');
-					}
-					KasirDetailTemp::truncate();
-				    DB::commit();
-					return response()->json(['type' => 'success', 'message' => "Successfully Created"]);
-
-				    // all good
-				} catch (\Exception $e) {
-				    DB::rollback();
-				    dd($e);
-					return response()->json(['type' => 'error', 'message' => "Silahkan cek koneksi Anda"]);
-				    // something went wrong
+					
+					return response()->json(['type' => 'success', 'message' => "Successfully Created", 'id' => $id]);
+				}else{
+					$kasir = Kasir::find($id);
+					$kasir->tanggal 	= date("Y-m-d",strtotime($request->input('input_tgl_kasir')));
+					$kasir->keterangan 	= $request->input('input_keterangan');
+					$kasir->user_id 		= $dt_auth->id;
+					$kasir->save();
+	            	return response()->json(['type' => 'success', 'message' => "Successfully Updated"]);
 				}
 			}
 		} else {
 			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
 		}
     }
-    function hitungKasir(){
-    	$kasirBuka = KasirLock::where('status','1')->first();
-    	$kasir = KasirDetail::select(DB::raw("sum(jumlah) as total_item"),DB::raw("sum(jumlah*harga_beli) as total_nilai_asal"),DB::raw("sum(jumlah*harga_jual) as total_nilai_jual"),DB::raw("sum(jumlah*harga_terjual) as total_nilai_terjual"))->first();
-		$view = View::make('admin.kasir.hitungKasir',compact(['kasir','kasirBuka']))->render();
-    	return response()->json(['html' => $view]);
-    }
-    function tutupKasir(Request $request){
-    	$dt_auth 	= Auth::user();
-		if ($request->ajax()) {
-		 // Setup the validator
-			$rules = [
-				'input_saldo_akhir'		=> 'required',
-				'input_saldo_manual'	=> 'required',
-			];
-			$validator = Validator::make($request->all(), $rules);
-			if ($validator->fails()) {
-				return response()->json([
-					'type' => 'error',
-					'errors' => $validator->getMessageBag()->toArray()
-				]);
-			} else {
-				$input = $request->all();
-				DB::table('trans_kasir_lock')
-                ->where('status', '1')
-                ->update([
-                	'nilai_akhir' 	=> $input['input_saldo_akhir'],
-                	'nilai_fisik' 	=> $input['input_saldo_manual'],
-                	'status' 		=> '2',
-                	'time' 			=> time(),
-                ]);
-				return response()->json(['type' => 'success', 'message' => "Successfully Created"]);
-			}
-		} else {
+    function destroy(Request $request, $id){
+    	if($request->ajax()){
+    		$kasir = KasirDetail::where('id',$id);
+			$kasir->delete();
+
+    		$kasir = Kasir::find($id);
+			$kasir->delete();
+        	return response()->json(['type' => 'success', 'message' => "Successfully Deleted"]);
+    	} else {
 			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
 		}
     }
-    public function allPaket(Request $request){
-    	$input = $request->all();
-    	$dt_paketMenu = PaketMenu::getAllPaketMenu($input,'data');
-        $no = isset($input['start']) ? $input['start'] : 0;
-        $data = array();
-        foreach($dt_paketMenu as $paketMenu){
-        	$dtPaket='';
-        	$paket = PaketMenuDetail::getPaket($paketMenu->id);
-        	foreach ($paket->get() as $key) {
-        		$dtPaket .= '<ul>';
-        		$dtPaket .= '<li>'.$key->jumlah.' '.$key->trans_produk_nama.'</li>';
-        		$dtPaket .= '</ul>';
-        	}
-            $no++;
-            $row = array();
-            $row[] = "<div class='editPaket' id='".$paketMenu->id."'>". $paketMenu->keterangan.' :<br>'.$dtPaket.'</di>';
-
-            $data[] = $row;
-        }
-        $output = array(
-		            "draw" => $input['draw'],
-		            "recordsTotal" =>  PaketMenu::getAllPaketMenu($input,'total'),
-		            "recordsFiltered" => PaketMenu::getAllPaketMenu($input,'raw'),
-		            "data" => $data,
-		            );
-		//output to json format
-		echo json_encode($output);
-    }
-    function pembelianPaket(Request $request,$id){
+    function editProduk(Request $request, $id){
     	if($request->ajax()){
-    		$paket = DB::table('trans_paket_menu')
-            ->select('trans_paket_menu.*')
-            ->where('trans_paket_menu.id', $id)
+    		$id = explode("__", $id);
+    		$produk = DB::table('mst_barang')
+            ->select('mst_barang.*')
+            ->where('mst_barang.id', $id[0])
             ->first();
-    		$view = View::make('admin.kasir.editPaket',compact(['paket']))->render();
+            $kasir = (object)[
+			    'id'  => $id[1],
+			];
+    		$view = View::make('bqs.kasir.editProduk',compact(['produk', 'kasir']))->render();
     		return response()->json(['html' => $view]);
     	} else {
 			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
 		}
     }
-    function createPembelianPaket(Request $request){
-    	$dt_auth 	= Auth::user();
-		if ($request->ajax()) {
-		 // Setup the validator
-			$rules = [
-				'input_detail_action'		=> 'required',
-			];
-			$validator = Validator::make($request->all(), $rules);
-			if ($validator->fails()) {
-				return response()->json([
-					'type' => 'error',
-					'errors' => $validator->getMessageBag()->toArray()
-				]);
-			} else {
-				DB::beginTransaction();
 
-				try {
-				    $input = $request->all();
-			    	$id 			= 'M'.time();
-			    	$produk 		= PaketMenuDetail::where('paket_menu_id',$input['paket_id'])->get();
-			    	$jumlah 		= $input['input_jumlah_beli_paket_'.$input['paket_id']];
-			    	$diskonProduk 	= 0;
-					foreach ($produk as $key) {
-						$produk 	= Produk::where('id',$key->produk_id)->first();
-						$kasir 		= KasirLock::where('status',1)->first();
-						$idDetail   = KasirDetailTemp::getID($kasir->id);
-						$cekTempDuplicate = KasirDetailTemp::where('produk_id',$key->produk_id)->where('kasir_lock_id',$kasir->id);
-						if (!$cekTempDuplicate->exists()) {
-							if (((int)$produk->stok - (int)$jumlah) >= 0) {
-					   //  		DB::rollback();
-								// return response()->json(['type' => 'error', 'message' =>  $produk->nama." hanya memiliki stok ".$produk->stok]);
-								KasirDetailTemp::create([
-									'id'			=> $idDetail,
-								    'kasir_lock_id'	=> $kasir->id,
-								    'produk_id'		=> $key->produk_id,
-								    'jumlah'		=> $key->jumlah * $jumlah,
-								    'harga_beli'	=> $produk->harga_beli,
-								    'harga_jual'	=> $produk->harga_jual,
-								    'diskon'		=> $diskonProduk,
-								    'harga_terjual'	=> $diskonProduk > 0 ? ($produk->harga_jual - ($produk->harga_jual*$diskonProduk)/100) : $produk->harga_jual,
-								    'keterangan'	=> '-',
-								]);
-					    	}
-						}else{
-							$duplicate = $cekTempDuplicate->first();
-							$duplicate->jumlah 		= $duplicate->jumlah+($key->jumlah * $jumlah);
-							$duplicate->harga_beli 	= $produk->harga_beli;
-							$duplicate->harga_jual 	= $produk->harga_jual;
-							$duplicate->diskon 		= $duplicate->diskon;
-							$duplicate->harga_terjual= $duplicate->diskon > 0 ? ($produk->harga_jual - ($produk->harga_jual*$duplicate->diskon)/100) : $produk->harga_jual;
-							$duplicate->save();
-							// return response()->json(['type' => 'error', 'message' => "Data Sudah pernah di masukan Keranjang. Silahkan edit data pada keranjang"]);
-						}
-					}
-				    DB::commit();
-					return response()->json(['type' => 'success', 'message' => "Successfully Created"]);
-				    // all good
-				} catch (\Exception $e) {
-				    DB::rollback();
-				    dd($e);
-					return response()->json(['type' => 'error', 'message' => "Silahkan cek koneksi Anda"]);
-				    // something went wrong
-				}
-			}
-		} else {
-			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
-		}
-    }
-    function print_pembelian(Request $request){
-    	$input = $request->all();
-    	$total 		= KasirDetailTemp::select(DB::raw("sum(jumlah) as total_item"),DB::raw("sum(jumlah*harga_beli) as total_nilai_asal"),DB::raw("sum(jumlah*harga_jual) as total_nilai_jual"),DB::raw("sum(jumlah*harga_terjual) as total_nilai_terjual"))->first();
-    	$input['search'] =[''];
-    	$dt_kasir 	= DB::table('trans_kasir_detail_temp')
-        	->join('trans_produk','trans_produk.id','=','trans_kasir_detail_temp.produk_id')
-        	->join('mst_satuan','mst_satuan.id','=','trans_produk.satuan_id')
-            ->select('trans_kasir_detail_temp.*','trans_produk.nama as trans_produk_nama' ,'mst_satuan.nama as mst_satuan_nama',DB::raw('@rownum:= @rownum +1 As rownum'))->get();
-    	$nama 		= App_config::where('id','nama_toko')->first();
-    	$alamat 	= App_config::where('id','web_alamat')->first();
-    	$kasir  	= (object)array();
-    	$kasir->pembeli 	= $input['pembeli'];
-    	$kasir->sub_total 	= $input['sub_total'];
-    	$kasir->diskon 		= $input['diskon'];
-    	$kasir->total_bayar = $input['total_bayar'];
-    	$kasir->bayar 		= $input['bayar'];
-    	$kasir->kembalian 	= $input['kembalian'];
-    	return view('admin.kasir.print',compact(['total','dt_kasir','nama','alamat','kasir']));
-    }
     function getValidateVarian(Request $request,$id){
     	if($request->ajax()){
     		$has_history = DB::table('histori_produk')->select('id')
@@ -542,6 +136,216 @@ class KasirController extends Controller
             $response['stok'] 			= $produk->stok;
     		return json_encode($response);
     	} else {
+			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
+		}
+    }
+    function createKasirDetail(Request $request){
+    	$dt_auth 	= Auth::user();
+		if ($request->ajax()) {
+		 // Setup the validator
+			$rules = [
+				'input_detail_action'		=> 'required',
+				'id'				=> 'required',
+			];
+			$validator = Validator::make($request->all(), $rules);
+			if ($validator->fails()) {
+				return response()->json([
+					'type' => 'error',
+					'errors' => $validator->getMessageBag()->toArray()
+				]);
+			} else {
+				DB::beginTransaction();
+
+				try {
+				    $input = $request->all();
+					$id = 'M'.time();
+					foreach ($input as $key => $value) {
+						if (substr($key, 0,25)=='input_jumlah_beli_produk_') {
+							$idProduk 	= explode('_', $key);
+							$produk 	= Produk::where('id',$idProduk[4])->first();
+							$idDetail   = KasirDetail::getID($input['id']);
+							$hasChild 	= Produk::hasChild($idProduk[4])->exists();
+							$cekKasirDuplicate = KasirDetail::where('produk_id',$idProduk[4])->where('id',$input['id']);
+							if (!$hasChild) {
+								if (!$cekKasirDuplicate->exists()) {
+										KasirDetail::create([
+											'id'			=> $idDetail,
+										    'id'=> $input['id'],
+										    'produk_id'		=> $idProduk[4],
+										    'jumlah'		=> $produk->stok,
+										    'jumlah_fisik'	=> $value,
+										    'selisih'		=> $value - $produk->stok,
+										    'harga'			=> $produk->harga_jual,
+										    'keterangan'	=> '-',
+										]);
+								}else{
+									self::UpdateNilai($input['id']);
+					    			DB::commit();
+									return response()->json(['type' => 'error', 'message' => "Data Sudah pernah di masukan. Silahkan edit di Tab Data Stok Opname"]);
+								}
+							}
+						}
+					}
+					self::UpdateNilai($input['id']);
+				    DB::commit();
+					return response()->json(['type' => 'success', 'message' => "Successfully Created", 'id' => $id]);
+
+				    // all good
+				} catch (\Exception $e) {
+				    DB::rollback();
+				    dd($e);
+					return response()->json(['type' => 'error', 'message' => "Silahkan cek koneksi Anda"]);
+				    // something went wrong
+				}
+			}
+		} else {
+			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
+		}
+    }
+    function updateKasirDetail(Request $request,$id){
+    	$dt_auth 	= Auth::user();
+		if ($request->ajax()) {
+		 // Setup the validator
+			$rules = [
+				'input_detail_action'		=> 'required',
+				'id'				=> 'required',
+			];
+			$validator = Validator::make($request->all(), $rules);
+			if ($validator->fails()) {
+				return response()->json([
+					'type' => 'error',
+					'errors' => $validator->getMessageBag()->toArray()
+				]);
+			} else {
+				DB::beginTransaction();
+
+				try {
+				    $input = $request->all();
+					$idBeli = explode("__", $id);
+					foreach ($input as $key => $value) {
+						if (substr($key, 0,25)=='input_jumlah_beli_produk_') {
+							$idProduk 	= explode('_', $key);
+							$produk 	= Produk::where('id',$idProduk[4])->first();
+							$idDetail   = KasirDetail::getID($input['id']);
+							$hasChild 	= Produk::hasChild($idProduk[4])->exists();
+
+							if (!$hasChild) {
+								DB::table('trans_stok_detail')
+					            ->where('id', $idBeli[0])
+					            ->where('id', $idBeli[1])
+					            ->update([
+								    'jumlah'		=> $produk->stok,
+								    'jumlah_fisik'	=> $value,
+								    'selisih'		=> $value - $produk->stok,
+								    'harga'			=> $produk->harga_jual,
+								    'keterangan'	=> '-',
+					            ]);
+				        	}
+						}
+					}
+					self::UpdateNilai($input['id']);
+				    DB::commit();
+					return response()->json(['type' => 'success', 'message' => "Successfully Created", 'id' => $id]);
+
+				    // all good
+				} catch (\Exception $e) {
+				    DB::rollback();
+					return response()->json(['type' => 'error', 'message' => "Silahkan cek koneksi Anda"]);
+				    // something went wrong
+				}
+			}
+		} else {
+			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
+		}
+    }
+    public function AllKasirDetail(Request $request){
+    	$input = $request->all();
+    	$dt_kasirDetail = KasirDetail::getAllKasirDetail($input,'data');
+        $no = isset($input['start']) ? $input['start'] : 0;
+        $data = array();
+        foreach($dt_kasirDetail as $kasirDetail){
+            $no++;
+            $row = array();
+        	$row[] = $no;
+            $row[] = $kasirDetail->mst_barang_nama;
+            $row[] = "<div class='row'><div class='col-6'>Stok</div><div class='col-6'>: ".$kasirDetail->jumlah.' '.$kasirDetail->mst_satuan_nama."</div><div class='col-6'>Opname Fisik</div><div class='col-6'>: ".$kasirDetail->jumlah_fisik.' '.$kasirDetail->mst_satuan_nama."</div><div class='col-6'>Selisih</div><div class='col-6'>: ".$kasirDetail->selisih.' '.$kasirDetail->mst_satuan_nama."</div></div>";
+            $row[] = "<a data-toggle='tooltip' class='col-md-3 btn btn-warning btn-md edit' id='".$kasirDetail->id.'__'.$kasirDetail->id."' title='Edit'> <i class='fa fa-edit text-error'></i></a> <a data-toggle='tooltip' class='col-md-3 btn btn-danger btn-md  delete' id='".$kasirDetail->id.'__'.$kasirDetail->id."' title='Delete'> <i class='fa fa-trash-alt'></i></a>";
+
+            $data[] = $row;
+        }
+        $output = array(
+		            "draw" => $input['draw'],
+		            "recordsTotal" =>  KasirDetail::getAllKasirDetail($input,'total'),
+		            "recordsFiltered" => KasirDetail::getAllKasirDetail($input,'raw'),
+		            "data" => $data,
+		            );
+		//output to json format
+		echo json_encode($output);
+    }
+    function editKasir(Request $request, $id){
+    	if($request->ajax()){
+    		$id = explode("__", $id);
+    		$produk = DB::table('trans_stok_detail')
+    		->join('mst_barang',  'mst_barang.id', '=', 'trans_stok_detail.produk_id')
+            ->select('trans_stok_detail.*','mst_barang.nama','mst_barang.foto','mst_barang.stok','mst_barang.stok_min','mst_barang.is_expire','mst_barang.tgl_kadaluarsa','mst_barang.harga_beli','mst_barang.harga_jual')
+            ->where('trans_stok_detail.id', $id[1])
+            ->where('trans_stok_detail.id', $id[0])
+            ->first();
+    		$view = View::make('bqs.kasir.editKasir',compact(['produk']))->render();
+    		return response()->json(['html' => $view]);
+    	} else {
+			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
+		}
+    }
+    function getNilai(Request $request,$kasir_id){
+		if ($request->ajax()) {
+    		$kasir = Kasir::select('total_nilai','total_item')->where('id',$kasir_id)->first();
+			return response()->json(['total_nilai' =>number_format($kasir->total_nilai,2),'total_item' => $kasir->total_item]);
+		} else {
+			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
+		}
+    }
+    function UpdateNilai($kasir_id){
+			$kasir = KasirDetail::select(DB::raw('sum(jumlah) as total_item'),DB::raw('sum(jumlah*harga) as total_nilai'))->where('id',$kasir_id)->first();
+			DB::table('trans_stok')
+            ->where('id', $kasir_id)
+            ->update([
+            	'total_nilai' => $kasir->total_nilai > 0 ? $kasir->total_nilai : 0,
+            	'total_item' => $kasir->total_item > 0 ? $kasir->total_item : 0,
+            ]);
+    }
+    function selesai(Request $request,$kasir_id){
+    	if ($request->ajax()) {
+    		DB::beginTransaction();
+
+			try {
+    			$dt_auth 	= Auth::user();
+			    $input = $request->all();
+			    $kasirDetail = KasirDetail::where('id',$kasir_id)->get();
+			    foreach ($kasirDetail as $key) {
+			    	$produk = Produk::where('id',$key->produk_id)->first();
+					$produk->stok = (int)$key->jumlah_fisik;
+					$produk->save();
+					if ($produk->sub_id!='') {
+						Produk::updateStok($produk->sub_id);
+					}
+			    }
+	    		DB::table('trans_stok')
+	            ->where('id', $kasir_id)
+	            ->update([
+	            	'status' => '1',
+	            ]);
+			    DB::commit();
+				return response()->json(['type' => 'success', 'message' => "Successfully Updated"]);
+
+			    // all good
+			} catch (\Exception $e) {
+			    DB::rollback();
+			    dd($e);
+			    // something went wrong
+				return response()->json(['type' => 'error', 'message' => "Silahkan cek koneksi Anda"]);
+			}
+		} else {
 			return response()->json(['status' => 'false', 'message' => "Access only ajax request"]);
 		}
     }

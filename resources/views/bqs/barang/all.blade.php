@@ -1,5 +1,5 @@
 @extends('bqs.layouts.admin')
-@section('title','Semua Kasir')
+@section('title','Semua Barang')
 @section('breadcumb')
 	<li class="breadcrumb-item"><a href="#">Access Managemen</a></li>
 	<li class="breadcrumb-item active">Operators</li>
@@ -10,7 +10,7 @@
     <div class="card card-outline card-info">
       <div class="card-header">
         <h3 class="card-title">
-          TABEL KASIR
+          TABEL BARANG
         </h3>
         <!-- tools box -->
         <div class="card-tools">
@@ -28,12 +28,10 @@
         	<div class="panel-body">
               <div class="row">
                   <div class="col-md-12" style="padding-bottom: 20px">
-                    <a href="{{ URL :: to('/bqs_template/kasir/create') }}">
-                    <button class="btn btn-primary" ><i class="fas fa-plus-square"></i>
-                        Tambah Kasir
+                    <button class="btn btn-primary" onclick="create()"><i class="fas fa-plus-square"></i>
+                        Tambah Barang
                     </button>
-                    </a>
-                    <button class="btn btn-success" onclick="reload_table()"><i class="fas fa-sync"></i> 
+                    <button class="btn btn-success" id="btn_refresh"><i class="fas fa-sync-alt"></i>
                         Refresh
                     </button>
                   </div>
@@ -42,9 +40,10 @@
                           <thead>
                           <tr>
                               <th>#</th>
-                              <th>Tgl Kasir</th>
-                              <th>Total</th>
-                              <th>Keterangan</th>
+                              <th>Nama</th>
+                              <th>Kategori</th>
+                              <th>Gambar</th>
+                              <th>Jumlah/Terpinjam</th>
                               <th width="20%">Action</th>
                           </tr>
                           </thead>
@@ -67,12 +66,12 @@
 </style>
 <script type="text/javascript">
 $(document).ready(function () {
-	$("#menu_transaksi").addClass('menu-open');
-	$("#menu_transaksi").addClass('active');
+	$("#menu_barang").addClass('menu-open');
+	$("#menu_barang_master_barang").addClass('active');
   table = $("#manage_all").DataTable({
     processing: true,
     serverSide: true,
-    ajax: '{!! route('admin.allKasir.kasir') !!}',
+    ajax: '{!! route('admin.allBarang.barang') !!}',
     "columnDefs": [
       { 
         "targets": [ -1,0 ], //last column
@@ -86,14 +85,63 @@ $(document).ready(function () {
       'height': '30px'
   });
 });
+$("#btn_refresh").click(function(){
+  reload_table();
+});
 function reload_table() {
     table.ajax.reload(null, false); //reload datatable ajax
 }
+function create(){
+  $("#modal_data").empty();
+  $('.modal-title').text('Tambah Barang');
+  $("#modal-size").addClass('modal-xl');
+  $("#modal-overlay").addClass('overlay d-flex justify-content-center align-items-center');
+  $("#modal-overlay-content").addClass('fas fa-2x fa-sync fa-spin');
+  $.ajax({
+    type:'GET',
+    url:'barang/create',
+    success: function (data) {
+        $("#modal-overlay").removeClass();
+        $("#modal-overlay-content").removeClass();
+        $("#modal_data").html(data.html);
+        $('#myModal').modal('show'); // show bootstrap modal
+    },
+    error: function (result) {
+      $("#modal-overlay").removeClass();
+      $("#modal-overlay-content").removeClass();
+      Swal.fire({
+        icon: 'error',
+        title: 'Terjadi kesalahan pada koneksi! <br>Pastikan koneksi Anda stabil'
+      })
+    }
+  })
+}
 $("#manage_all").on("click", ".edit", function () {
-  var id = $(this).attr('id');
-  var base_url = "{!! url('/') !!}";
-  window.location = base_url+'/admin_bqs/kasir/' + id + '/edit';
-    
+    $("#modal_data").empty();
+    $("#modal-size").addClass('modal-xl');
+    $('.modal-title').text('Edit Barang'); // Set Title to Bootstrap modal title
+    $("#modal-overlay").addClass('overlay d-flex justify-content-center align-items-center');
+    $("#modal-overlay-content").addClass('fas fa-2x fa-sync fa-spin');
+    var id = $(this).attr('id');
+
+    $.ajax({
+        url: 'barang/' + id + '/edit',
+        type: 'get',
+        success: function (data) {
+          $("#modal-overlay").removeClass();
+          $("#modal-overlay-content").removeClass();
+          $("#modal_data").html(data.html);
+          $('#myModal').modal('show'); // show bootstrap modal
+        },
+        error: function (result) {
+          $("#modal-overlay").removeClass();
+          $("#modal-overlay-content").removeClass();
+          Swal.fire({
+            icon: 'error',
+            title: 'Terjadi kesalahan pada koneksi! <br>Pastikan koneksi Anda stabil'
+          })
+        }
+    });
 });
 $("#manage_all").on("click", ".delete", function () {
     var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
@@ -111,7 +159,7 @@ $("#manage_all").on("click", ".delete", function () {
     }).then((result) => {
       if (result.value) {
         $.ajax({
-            url: 'kasir/' + id,
+            url: 'barang/' + id,
             data: {"_token": CSRF_TOKEN},
             type: 'DELETE',
             dataType: 'json',

@@ -17,7 +17,7 @@ return [
     'icon_all'  => ['tachometer-alt','cash-register','cogs','store','book','chart-line','database'],
     'menu_all'  => [
         'Dashboard'         => 'bqs_template/dashboard',
-        'Transaksi'         => 'bqs_template/transaksi',
+        'Transaksi'         => 'bqs_template/kasir',
         'Access Management' => [
             'Config'          => 'bqs_template/config',
             'Operator'          => 'bqs_template/users',
@@ -25,9 +25,6 @@ return [
         ],
         'Barang'            => [
             'Master Barang'     => 'bqs_template/barang',
-        ],
-        'Laporan'           => [
-            'Laporan Peminjaman' => 'bqs_template/barang',
         ],
         'Chart'             => [
             'Chart Peminjaman'   => 'bqs_template/barang',

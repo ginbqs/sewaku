@@ -20,26 +20,18 @@ Route::post('autocompleteLevel', 'Panel\LevelController@autocomplete')->name('au
 
 Route::resource('/barang','BarangController');
 Route::get('/allBarang','BarangController@allBarang')->name('allBarang.barang');
-Route::get('/cekChild/{id}','BarangController@cekChild')->name('cekChild.barang');
-Route::resource('/barangDetail','BarangDetailController');
-Route::get('/allBarangDetail','BarangDetailController@allBarangDetail')->name('allBarangDetail.barang');
+Route::post('autocompleteBarang', 'BarangController@autocomplete')->name('autocompleteBarang.barang');
 
 Route::resource('/kasir','KasirController');
 Route::get('/allKasir','KasirController@allKasir')->name('allKasir.kasir');
-Route::get('/allKeranjang','KasirController@allKeranjang')->name('allKeranjang.kasir');
-Route::get('/allProdukKasir','KasirController@allProduk')->name('allProdukKasir.kasir');
-Route::post('/cekKasirAbsen','KasirController@cekKasirAbsen')->name('cekKasirAbsen.kasir');
-Route::post('/bukaKasir','KasirController@bukaKasir')->name('bukaKasir.kasir');
-Route::get('/pembelianProduk/{id}','KasirController@pembelianProduk')->name('pembelianProduk.kasir');
-Route::get('/keranjangProduk/{id}','KasirController@keranjangProduk')->name('keranjangProduk.kasir');
-Route::post('/createPembelian','KasirController@createPembelian')->name('createPembelian.kasir');
-Route::get('/getKeranjang','KasirController@getKeranjang')->name('getKeranjang.kasir');
-Route::post('/checkOut','KasirController@checkOut')->name('checkOut.kasir');
-Route::get('/hitungKasir','KasirController@hitungKasir')->name('hitungKasir.kasir');
-Route::post('/tutupKasir','KasirController@tutupKasir')->name('tutupKasir.kasir');
-Route::get('/checkOutHp','KasirController@checkOutHp')->name('checkOutHp.kasir');
-Route::get('/allPaket','KasirController@allPaket')->name('allPaket.kasir');
-Route::get('/pembelianPaket/{id}','KasirController@pembelianPaket')->name('pembelianPaket.kasir');
-Route::post('/createPembelianPaket','KasirController@createPembelianPaket')->name('createPembelianPaket.kasir');
-Route::post('/print_pembelian','KasirController@print_pembelian')->name('print_pembelian.kasir');
-Route::get('/getValidateVarian/{id}','KasirController@getValidateVarian')->name('getValidateVarian.kasir');
+Route::get('/kasir/editProduk/{id}','KasirController@editProduk')->name('editProduk.kasir');
+Route::get('/kasir/editKasir/{id}','KasirController@editKasir')->name('editKasir.kasir');
+Route::get('/kasir/getValidateVarian/{id}','KasirController@getValidateVarian')->name('getValidateVarian.kasir');
+Route::get('/kasir/getNilai/{id}','KasirController@getNilai')->name('getNilai.kasir');
+Route::post('/kasir/createKasirDetail','KasirController@createKasirDetail')->name('createKasirDetail.kasir');
+Route::post('/kasir/updateKasirDetail/{id}','KasirController@updateKasirDetail')->name('updateKasirDetail.kasir');
+Route::post('/kasir/selesai/{id}','KasirController@selesai')->name('selesai.kasir');
+
+Route::resource('/kasir/kasirDetail','KasirDetailController');
+Route::get('/allKasirDetail','KasirController@allKasirDetail')->name('allKasirDetail.kasirDetail');
+

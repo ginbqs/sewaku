@@ -3,7 +3,7 @@
 // namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Buku;
+use App\Models\Barang;
 
 class CreateBuku extends Seeder
 {
@@ -14,7 +14,7 @@ class CreateBuku extends Seeder
      */
     public function run()
     {
-        Buku::create([
+        Barang::create([
         	'id'		=> 'B'.time(),
 	        'nama'		=> 'Buku BQS',
 	        'kategori' 	=> 'ilmu Komplit & Novel',
