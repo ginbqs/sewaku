@@ -1,10 +1,9 @@
 
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
   <!-- Brand Logo -->
-  <a href="index3.html" class="brand-link">
-    <img src="{{ url('lte/dist/img/AdminLTELogo.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
-         style="opacity: .8">
-    <span class="brand-text font-weight-light">AdminLTE 3</span>
+  <a href="{{ URL :: to('bqs_template/dashboard') }}" class="brand-link" style="text-align: center;background-color: white;height: 50px;padding-top: 3px">
+    <img src="{{ url('images/logo.png') }}"c lass="brand-image img-circle elevation-3" style="width: 120px">
+    <!-- <span class="brand-text font-weight-light">AdminLTE 3</span> -->
   </a>
 
   <!-- Sidebar -->

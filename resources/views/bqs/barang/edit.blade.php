@@ -3,7 +3,7 @@
   <div class="card-body">
     <div class="row" style="padding-top: 10px">
       <div class="col-md-4">
-        <img src="{{ asset('lte/dist/img/imageDefault.png') }}" class="product-image" alt="Product Image"  style="height: 220px">
+        <img src="{{ isset($barang->gambar) && $barang->gambar!='' ? asset($barang->gambar) : asset('lte/dist/img/imageDefault.png') }}" class="product-image" alt="Product Image"  style="height: 220px">
         <div class="form-group" style="padding-top: 25px"></div>
       </div>
       <div class="col-md-8">
@@ -18,7 +18,7 @@
               <label for="input_gambar">Foto Dasar</label>
               <div class="input-group">
                 <div class="custom-file">
-                  <input type="file" id="input_gambar" name="input_gambar"> value="{{$barang->gambar}}"
+                  <input type="file" id="input_gambar" name="input_gambar">{{$barang->gambar}}
                   <span id="error_input_gambar" class="error invalid-feedback"></span>
                 </div>
               </div>

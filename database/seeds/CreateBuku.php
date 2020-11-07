@@ -24,7 +24,7 @@ class CreateBuku extends Seeder
 	        'isbn'		=> '111222211111122',
 	        'halaman'	=> '1500',
 	        'jumlah'	=> '1001',
-	        'gambar' 	=> 'buku/bqs_buku.jpg',
+	        'gambar' 	=> 'barang/default.png',
 	        'sinopsis' => 'Menceritakan perjalanan hidup dan sort cut sukses',
 	        'nama_rak' 	=> 'rak ilmu pengetahuan',
         ]);
