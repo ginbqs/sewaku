@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\Barang;
-use App\Models\HistoriBarang;
+use App\Models\Kasir;
 use Illuminate\Support\Facades\Validator;
 Use View;
 Use DB;
@@ -24,6 +24,11 @@ class BarangController extends Controller
     	$input = $request->all();
     	$dt_barang = Barang::getAllBarang($input,'data');
         $no = isset($input['start']) ? $input['start'] : 0;
+        $sumber = isset($input['sumber']) ? $input['sumber'] : '';
+        $trans_stok_id = isset($input['trans_stok_id']) ? $input['trans_stok_id'] : '';
+        if ($sumber=='kasir') {
+        	$dtKasir = Kasir::find($trans_stok_id);
+        }
         $data = array();
         foreach($dt_barang as $barang){
         	$url= asset($barang->gambar);
@@ -34,7 +39,17 @@ class BarangController extends Controller
             $row[] = $barang->kategori;
             $row[] = $barang->gambar!='' ?  '<img src="'.$url.'"   height="50" class="img-rounded" align="center" />' : "Kosong";
             $row[] = 'Stok : '.$barang->jumlah.'<br> Terpinjam : '.$barang->terpinjam;
-            $row[] = "<a data-toggle='tooltip' class='col-md-3 btn btn-warning btn-md edit' id='".$barang->id."' title='Edit'> <i class='fa fa-edit text-error'></i></a> <a data-toggle='tooltip' class='col-md-3 btn btn-danger btn-md  delete' id='".$barang->id."' title='Delete'> <i class='fa fa-trash-alt'></i></a>";
+            if ($sumber=='kasir') {
+            	$id_luar = ($sumber=='kasir' ? $trans_stok_id : '');
+            	if ($dtKasir->status=='draft') {
+            	$row[] = "<a data-toggle='tooltip' class='col-md-12 btn btn-warning btn-md edit' id='".$barang->id.'__'.$id_luar."' title='Beli' style='padding:20px'> <i class='fa fa-edit text-error'></i></a>";
+            	}else{
+            	$row[] = "<a data-toggle='tooltip' class='col-md-12 btn btn-danger btn-md' title='Terkunci' style='padding:20px'> <i class='fa fa-lock text-error'></i> Terkunci</a>";
+            	}
+            	$row[] = "<a data-toggle='tooltip' class='col-md-12 btn btn-warning btn-md edit' id='".$barang->id.'__'.$id_luar."' title='Beli' style='padding:20px'> <i class='fa fa-edit text-error'></i></a>";
+            }else{
+	            $row[] = "<a data-toggle='tooltip' class='col-md-3 btn btn-warning btn-md edit' id='".$barang->id."' title='Edit'> <i class='fa fa-edit text-error'></i></a> <a data-toggle='tooltip' class='col-md-3 btn btn-danger btn-md  delete' id='".$barang->id."' title='Delete'> <i class='fa fa-trash-alt'></i></a>";
+	        }
 
             $data[] = $row;
         }

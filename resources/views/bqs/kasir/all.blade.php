@@ -42,9 +42,11 @@
                           <thead>
                           <tr>
                               <th>#</th>
-                              <th>Tgl Kasir</th>
-                              <th>Total</th>
-                              <th>Keterangan</th>
+                              <th>Nama</th>
+                              <th>Tanggal</th>
+                              <th>Barang</th>
+                              <th>Pembayaran</th>
+                              <th>Status</th>
                               <th width="20%">Action</th>
                           </tr>
                           </thead>
@@ -92,7 +94,7 @@ function reload_table() {
 $("#manage_all").on("click", ".edit", function () {
   var id = $(this).attr('id');
   var base_url = "{!! url('/') !!}";
-  window.location = base_url+'/admin_bqs/kasir/' + id + '/edit';
+  window.location = base_url+'/bqs_template/kasir/' + id + '/edit';
     
 });
 $("#manage_all").on("click", ".delete", function () {

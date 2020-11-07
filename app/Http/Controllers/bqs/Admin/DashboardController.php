@@ -14,8 +14,9 @@ class DashboardController extends Controller
     }
     public function index(){
     	if(Auth::check()){
-    		return view('bqs/layouts/admin');
+    		return view('bqs.dashboard');
 	     }
          return redirect('/bqs_template/login_bqs')->withSuccess('Oppes! You have entered invalid credentials');
     }
+    
 }

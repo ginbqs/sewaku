@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Backend\Admin;
+namespace App\Http\Controllers\bqs\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -20,19 +20,10 @@ class KasirDetailController extends Controller
 
 			try {
 			    $id = explode("__", $id);
-	    		$kasir = KasirDetail::where('id',$id[1])->where('id',$id[0]);
+	    		$kasir = KasirDetail::where('id',$id[1])->where('trans_stok_id',$id[0]);
 				$kasir->delete();
-
-	    		$kasir = KasirDetail::select(DB::raw('sum(jumlah) as total_item'),DB::raw('sum(jumlah*harga) as total_nilai'))
-	    		->where('id',$id[1])->first();
-				 DB::table('trans_stok')
-	                ->where('id', $id[1])
-	                ->update([
-	                	'total_nilai' => $kasir->total_nilai > 0 ? $kasir->total_nilai : 0,
-	                	'total_item' => $kasir->total_item > 0 ? $kasir->total_item : 0,
-	                ]);
 			    DB::commit();
-	        	return response()->json(['type' => 'success', 'message' => "Successfully Deleted", 'total_nilai' => number_format($kasir->total_nilai), 'total_item' => $kasir->total_item]);
+	        	return response()->json(['type' => 'success', 'message' => "Successfully Deleted"]);
 
 			    // all good
 			} catch (\Exception $e) {

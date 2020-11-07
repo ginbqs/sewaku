@@ -41,7 +41,7 @@ class CreateUser extends Seeder
 	        'kecamatan'	=> 'Cihampelas',
 	        'desa' 		=> 'Kec. Mekarjaya',
 	        'alamat' 	=> 'Kp, Cibalok',
-	        'foto' 		=> 'users/gin.jpg',
+	        'foto' 		=> 'users/gin.jpeg',
             'user_level_id' => 'petugas',
         ]);
         User::create([
@@ -62,7 +62,7 @@ class CreateUser extends Seeder
 	        'kecamatan'	=> 'Cihampelas',
 	        'desa' 		=> 'Kec. Mekarjaya',
 	        'alamat' 	=> 'Kp, Cibalok',
-	        'foto' 		=> 'users/gin.jpg',
+	        'foto' 		=> 'users/gin.jpeg',
             'user_level_id' => 'peminjam',
         ]);
     }

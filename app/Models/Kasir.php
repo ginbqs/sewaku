@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Kasir;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
@@ -12,10 +12,10 @@ class Kasir extends Model
     protected $keyType = 'string';
     public $timestamps = false;
     protected $fillable = [
-        'id','tanggal','keterangan','total_nilai','total_item','user_id','status'
+        'id','tanggal_pinjam','tanggal_kembali','tanggal_dikembalikan','hari_telat','total_bayar','total_denda','total_uang','total_kembali','status','keterangan','user_id','peminjam'
     ];
-    const order = ['trans_stok.tanggal' => 'DESC'];
-    const columns = ['trans_stok.tanggal','trans_stok.total_nilai','trans_stok.keterangan','trans_stok.user_id'];
+    const order = ['trans_stok.tanggal_pinjam' => 'DESC'];
+    const columns = ['id','tanggal_pinjam','tanggal_kembali','tanggal_dikembalikan','hari_telat','total_bayar','total_denda','total_uang','total_kembali','status','keterangan','user_id','peminjam'];
 
     public static function getAllKasir($input,$type='row'){
         $dt_kasir = DB::table('trans_stok')

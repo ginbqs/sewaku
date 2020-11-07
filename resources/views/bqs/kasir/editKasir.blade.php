@@ -4,7 +4,7 @@
 
     <div class="row" style="padding-top: 10px">
       <div class="col-md-4">
-        <img src="@if($produk->foto!='') {{asset('e-rung/public/'.$produk->foto)}} @else {{asset('admin/dist/img/imageDefault.jpg')}} @endif" class="product-image" alt="Product Image"  style="height: 220px">
+        <img src="@if($produk->gambar!='') {{asset($produk->gambar)}} @else {{asset('admin/dist/img/imageDefault.jpg')}} @endif" class="product-image" alt="Product Image"  style="height: 220px">
       </div>
       <div class="col-md-8">
         <div class="form-group">
@@ -13,47 +13,29 @@
           </h4>
         </div>
         <div class="row">
-          <label class="col-6">Tipe</label>
-          <label class="col-6">: {{$produk->mst_tipe_nama}}</label>
-        </div>
-        <div class="row">
           <label class="col-6">Kategori</label>
-          <label class="col-6">: {{$produk->mst_kategori_nama}}</label>
+          <label class="col-6">: {{$produk->kategori}}</label>
         </div>
         <div class="row">
           <label class="col-6">Stok</label>
-          <label class="col-6">: {{$produk->stok}} {{$produk->mst_satuan_nama}}</label>
-        </div>
-        <div class="row">
-          <label class="col-6">Stok Minimal</label>
-          <label class="col-6">: {{$produk->stok_min}}  {{$produk->mst_satuan_nama}}</label>
-        </div>
-        <div class="row">
-          <label class="col-6">Tgl Kadaluarsa</label>
-          <label class="col-6">: @if($produk->is_expire=='1') {{$produk->tgl_kadaluarsa}} @else - @endif</label>
-        </div>
-        <div class="row" id="tampil_harga" >
-          <div class="row">
-            <label class="col-6">Harga Beli</label>
-            <label class="col-6">: {{$produk->harga_beli}}</label>
-          </div>
-          <div class="row">
-            <label class="col-6">Harga Jual</label>
-            <label class="col-6">: {{$produk->harga_jual}}</label>
-          </div>
+          <label class="col-6">: {{$produk->stok}}</label>
         </div>
       </div>
     </div>
     <div class="row" id="form_add_kasir">
-      <label class="col-sm-12" style="text-align: center;"> <span style="font-size: 20px">Jumlah Beli : </span> </label>
+      <label class="col-sm-12" style="text-align: center;"> <span style="font-size: 20px">Jumlah Sewa : </span> </label>
       <div class="col-sm-2">
-        <button class="btn btn-danger btn-block" id="minus_input_jumlah_beli_produk_{{$produk->produk_id}}" type="button"><span style="font-size: 25px;font-weight: bold;">-</span></button>
+        <button class="btn btn-danger btn-block" id="minus_input_jumlah_beli_produk_{{$produk->barang_id}}" type="button"><span style="font-size: 25px;font-weight: bold;">-</span></button>
       </div>
       <div class="col-sm-8">
-        <input type="number" name="input_jumlah_beli_produk_{{$produk->produk_id}}" id="input_jumlah_beli_produk_{{$produk->produk_id}}" step="any" class="form-control" style="height: 50px" value="{{$produk->jumlah_fisik}}">
+        <input type="number" name="input_jumlah_beli_produk_{{$produk->barang_id}}" id="input_jumlah_beli_produk_{{$produk->barang_id}}" step="any" class="form-control" style="height: 50px" value="{{$produk->jumlah}}">
       </div>
       <div class="col-sm-2">
-        <button class="btn btn-success  btn-block" id="add_input_jumlah_beli_produk_{{$produk->produk_id}}" type="button"><span style="font-size: 25px;font-weight: bold;">+</span></button>
+        <button class="btn btn-success  btn-block" id="add_input_jumlah_beli_produk_{{$produk->barang_id}}" type="button"><span style="font-size: 25px;font-weight: bold;">+</span></button>
+      </div>
+      <div class="col-md-12">
+        <label class="col-sm-12" style="text-align: center;"> <span style="font-size: 15px">Keterangan : </span> </label>
+        <textarea name="input_keterangan_detail" id="input_keterangan_detail" placeholder="Keterangan" class="form-control" rows="3">{{$produk->keterangan}}</textarea>
       </div>
     </div>
   </div>
@@ -82,6 +64,8 @@ $(document).ready(function () {
     myDataDetail.append('_token', CSRF_TOKEN);
     myDataDetail.append('trans_stok_id', "{{$produk->trans_stok_id}}");
     myDataDetail.append('input_detail_action', 'add');
+    myDataDetail.append('input_keterangan', $("#input_keterangan_detail").val());
+    myDataDetail.append('input_nama_barang', "{{$produk->nama}}");
     let number = 0;
     $("input[name^='input_jumlah_beli_produk_']" ).each(function(){
       number = parseInt(number) + parseInt($(this).val());
@@ -141,18 +125,18 @@ $(document).ready(function () {
   });
 });
 
-$("#minus_input_jumlah_beli_produk_{{$produk->produk_id}}").click(function(){
-    let oldValue = $("#input_jumlah_beli_produk_{{$produk->produk_id}}").val();
+$("#minus_input_jumlah_beli_produk_{{$produk->barang_id}}").click(function(){
+    let oldValue = $("#input_jumlah_beli_produk_{{$produk->barang_id}}").val();
     if(parseInt(oldValue) - 1 < 0){
-      $("#input_jumlah_beli_produk_{{$produk->produk_id}}").val(0)
+      $("#input_jumlah_beli_produk_{{$produk->barang_id}}").val(0)
     }else{
       let newValue = parseInt(oldValue)-1;
-      $("#input_jumlah_beli_produk_{{$produk->produk_id}}").val(newValue);
+      $("#input_jumlah_beli_produk_{{$produk->barang_id}}").val(newValue);
     }
   });
-  $('#add_input_jumlah_beli_produk_{{$produk->produk_id}}').click(function() {
-    let oldValue = $("#input_jumlah_beli_produk_{{$produk->produk_id}}").val();
+  $('#add_input_jumlah_beli_produk_{{$produk->barang_id}}').click(function() {
+    let oldValue = $("#input_jumlah_beli_produk_{{$produk->barang_id}}").val();
     let newValue = parseInt(oldValue)+1;
-    $("#input_jumlah_beli_produk_{{$produk->produk_id}}").val(newValue);
+    $("#input_jumlah_beli_produk_{{$produk->barang_id}}").val(newValue);
   });
 </script>

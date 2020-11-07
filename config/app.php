@@ -27,7 +27,7 @@ return [
             'Master Barang'     => 'bqs_template/barang',
         ],
         'Chart'             => [
-            'Chart Peminjaman'   => 'bqs_template/barang',
+            'Chart Peminjaman'   => 'bqs_template/semua',
         ],
     ],
     /*

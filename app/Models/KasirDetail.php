@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Kasir;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
@@ -12,16 +12,14 @@ class KasirDetail extends Model
     protected $keyType = 'string';
     public $timestamps = false;
     protected $fillable = [
-        'id','trans_stok_id','produk_id','jumlah','jumlah_fisik','selisih','harga','keterangan'
+        'id','trans_stok_id','barang_id','nama_barang','jumlah','keterangan'
     ];
-    const order = ['trans_produk.nama' => 'ASC'];
-    const columns = ['trans_produk.nama','trans_stok_detail.produk_id','trans_stok_detail.jumlah','trans_stok_detail.jumlah_fisik','trans_stok_detail.harga','trans_stok_detail.keterangan'];
+    const order = ['trans_stok_detail.nama_barang' => 'ASC'];
+    const columns = ['id','trans_stok_id','barang_id','nama_barang','jumlah','keterangan'];
 
     public static function getAllKasirDetail($input,$type='row'){
         $dt_kasirDetail = DB::table('trans_stok_detail')
-        	->join('trans_produk','trans_produk.id','=','trans_stok_detail.produk_id')
-        	->join('mst_satuan','mst_satuan.id','=','trans_produk.satuan_id')
-            ->select('trans_stok_detail.*','trans_produk.nama as trans_produk_nama' ,'mst_satuan.nama as mst_satuan_nama',DB::raw('@rownum:= @rownum +1 As rownum'))
+            ->select('trans_stok_detail.*',DB::raw('@rownum:= @rownum +1 As rownum'))
             ->where('trans_stok_detail.trans_stok_id',$input['trans_stok_id']);
         if ($type!='total') {
             $i = 0;
@@ -66,5 +64,14 @@ class KasirDetail extends Model
     		return sprintf('%05d', ($kasir->id_detail+1));
     	}
     	return sprintf('%05d', 1);
+    }
+    public static function getBarangPinjam($trans_stok_id){
+        $kasirDetail = DB::table('trans_stok_detail')
+            ->where('trans_stok_id',$trans_stok_id)->get();
+        $data = '';
+        foreach ($kasirDetail as $key) {
+            $data .= $key->jumlah.' '.$key->nama_barang.'<br>';
+        }
+        return $data;
     }
 }

@@ -17,9 +17,16 @@ class CreateTransaksiTable extends Migration
             $table->string('id',15);
             $table->date('tanggal_pinjam');
             $table->date('tanggal_kembali');
-            $table->enum('status',['pinjam','kembali']);
-            $table->text('keterangan');
+            $table->date('tanggal_dikembalikan')->nullable();
+            $table->integer('hari_telat')->nullable();
+            $table->integer('total_bayar')->nullable();
+            $table->integer('total_denda')->nullable();
+            $table->integer('total_uang')->nullable();
+            $table->integer('total_kembali')->nullable();
+            $table->enum('status',['draft','pinjam','kembali']);
+            $table->text('keterangan')->nullable();
             $table->string('user_id',15);
+            $table->string('peminjam');
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
@@ -30,10 +37,9 @@ class CreateTransaksiTable extends Migration
             $table->string('id',5);
             $table->string('trans_stok_id',15);
             $table->string('barang_id',50);
-            $table->integer('stok_awal');
-            $table->integer('stok_pinjam');
-            $table->integer('stok_sekarang');
-            $table->text('keterangan');
+            $table->string('nama_barang',50);
+            $table->integer('jumlah');
+            $table->text('keterangan')->nullable();
 
 
             $table->foreign('barang_id')->references('id')->on('mst_barang');

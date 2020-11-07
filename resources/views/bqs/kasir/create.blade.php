@@ -35,9 +35,18 @@
                         <div class="row">
                           <div class="col-md-6">
                             <div class="form-group">
-                              <label for="input_tgl_kasir">Tanggal Kasir</label><br>
-                              <input type="text" id="input_tgl_kasir" class="form-control" name="input_tgl_kasir" autocomplete="off">
+                              <label for="input_peminjam">Peminjam</label><br>
+                              <input type="text" id="input_peminjam" class="form-control" name="input_peminjam" placeholder="Peminjam" autocomplete="off">
+                              <input type="hidden" id="input_peminjam_id" class="form-control" name="input_peminjam_id" autocomplete="off" >
                               <input type="hidden" id="input_action" class="form-control" name="input_action" autocomplete="off" value="{{$act}}">
+                            </div>
+                            <div class="form-group">
+                              <label for="input_pinjam">Tanggal Pinjam</label><br>
+                              <input type="text" id="input_pinjam" class="form-control" name="input_pinjam" placeholder="Tanggal Pinjam" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                              <label for="input_harus_dikembalikan">Tanggal Harus Dikembalikan</label><br>
+                              <input type="text" id="input_harus_dikembalikan" class="form-control" name="input_harus_dikembalikan" placeholder="Tanggal Harus Dikembalikan" autocomplete="off">
                             </div>
                           </div>
                           <div class="col-md-6">
@@ -77,13 +86,59 @@
         }
     }
 </style>
+<style type="text/css">
+  #ui-datepicker-div{
+    background-color: #b8b8b8
+  }
+  .ui-datepicker-header{
+    text-align: center;
+  }
+  .ui-datepicker-prev{
+    margin-right:40%
+  }
+</style>
 <script type="text/javascript">
 $(document).ready(function () {
   $("#menu_transaksi").addClass('menu-open');
   $("#menu_transaksi").addClass('active');
-  $("#input_tgl_kasir").datepicker();
+  $("#input_pinjam").datepicker();
+  $("#input_harus_dikembalikan").datepicker();
   
   var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+  $("#input_peminjam" ).autocomplete({
+    source: function( request, response ) {
+      $.ajax({
+        url:"{{route('admin.autocompleteUser.user')}}",
+        type: 'post',
+        dataType: "json",
+        data: {
+           _token: CSRF_TOKEN,
+           search: request.term,
+           table:'provinsi'
+        },
+        success: function( data ) {
+           response( data );
+        },
+        error: function (result) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Terjadi kesalahan pada koneksi! <br>Pastikan koneksi Anda stabil'
+          })
+        }
+      });
+    },
+    select: function (event, ui) {
+       // Set selection
+       $('#input_peminjam').val(ui.item.label); // display the selected text
+       $('#input_peminjam_id').val(ui.item.value); // save selected id to input
+       return false;
+    }
+  }).data( "ui-autocomplete" )._renderItem = function( ul, item ) {
+    return $( "<li style='padding-left:10px;'>" )
+      .data( "ui-autocomplete-item", item )
+      .append(  item.label + "<br><span style='font-size:11;font-style:italic'>Longitude / Latitude : " + item.longitude + " / " + item.longitude + "</span>" )
+      .appendTo( ul );
+  }
   $('#create').validate({
     submitHandler: function (form) {
         var myData = new FormData($("#create")[0]);

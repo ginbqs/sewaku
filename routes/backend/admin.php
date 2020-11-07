@@ -13,6 +13,7 @@ Route::post('autocompleteProvinsi', 'Panel\UserController@autocomplete')->name('
 Route::post('autocompleteKota', 'Panel\UserController@autocomplete')->name('autocompleteKota.kota');
 Route::post('autocompleteKecamatan', 'Panel\UserController@autocomplete')->name('autocompleteKecamatan.kecamatan');
 Route::post('autocompleteDesa', 'Panel\UserController@autocomplete')->name('autocompleteDesa.desa');
+Route::post('autocompleteUser', 'Panel\UserController@autocompleteUser')->name('autocompleteUser.user');
 
 Route::resource('level','Panel\LevelController');
 Route::get('/allLevel','Panel\LevelController@allLevel')->name('allLevel.level');
@@ -31,7 +32,14 @@ Route::get('/kasir/getNilai/{id}','KasirController@getNilai')->name('getNilai.ka
 Route::post('/kasir/createKasirDetail','KasirController@createKasirDetail')->name('createKasirDetail.kasir');
 Route::post('/kasir/updateKasirDetail/{id}','KasirController@updateKasirDetail')->name('updateKasirDetail.kasir');
 Route::post('/kasir/selesai/{id}','KasirController@selesai')->name('selesai.kasir');
+Route::post('/kasir/kembalikan/{id}','KasirController@kembalikan')->name('kembalikan.kasir');
 
 Route::resource('/kasir/kasirDetail','KasirDetailController');
 Route::get('/allKasirDetail','KasirController@allKasirDetail')->name('allKasirDetail.kasirDetail');
+
+Route::resource('semua','SemuaController');
+Route::post('/getChartSemuaTrans','SemuaController@getChartSemuaTrans')->name('getChartSemuaTrans.chart');
+Route::post('/getChartSemuaTransBulanan','SemuaController@getChartSemuaTransBulanan')->name('getChartSemuaTransBulanan.chart');
+Route::post('/getTotalTransaksi','SemuaController@getTotalTransaksi')->name('getTotalTransaksi.chart');
+Route::post('/getTotalDashboard','SemuaController@getTotalDashboard')->name('getTotalDashboard.chart');
 

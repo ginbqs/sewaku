@@ -21,9 +21,7 @@ Auth::routes([
 	'logout' => false,
 	'confirm' => false
 ]);
-Route::get('/','FrontEndController@index');
-Route::post('/getDataFavorite','FrontEndController@getFavoriteHome');
-Route::get('/jenis_produk/{id}','FrontEndController@jenis_produk');
+Route::get('/','AuthController@index');
 
 
 Route::group([

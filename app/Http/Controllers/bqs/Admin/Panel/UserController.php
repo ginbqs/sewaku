@@ -235,4 +235,22 @@ class UserController extends Controller
 
         return response()->json($response);
     }
+    public function autocompleteUser(Request $request)
+    {
+    	$input 	= $request->all();
+        $search = $request->input('search');
+
+        if($search == ''){
+            $users = User::orderby('nama','asc')->select($table)->where('user_level_id','peminjam')->limit(5);
+        }else{
+            $users = User::orderby('nama','asc')->select('users.*')->where('nama', 'like', '%' .$search . '%')->where('user_level_id','peminjam')->limit(5);
+        }
+        $users = $users->get();
+        $response = array();
+        foreach($users as $user){
+            $response[] = array("value"=>$user->id,"label"=>$user->nama);
+        }
+
+        return response()->json($response);
+    }
 }

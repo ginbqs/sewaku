@@ -40,6 +40,8 @@ class ProfileComposer
         foreach ($dtConfig as $key) {
             $config[$key->id] = $key->value;
         }
+        $dt_auth    = Auth::user();
+        $config['foto_user'] = isset($dt_auth->foto) && $dt_auth->foto!='' ? $dt_auth->foto : NULL;
         $view->with(compact('config'));
     }
 }

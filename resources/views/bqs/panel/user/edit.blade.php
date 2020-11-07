@@ -125,6 +125,15 @@
   .capitalize {
     text-transform: uppercase;
   }
+  #ui-datepicker-div{
+    background-color: #b8b8b8
+  }
+  .ui-datepicker-header{
+    text-align: center;
+  }
+  .ui-datepicker-prev{
+    margin-right:40%
+  }
 </style>
 <script type="text/javascript">
 $(document).ready(function () {
